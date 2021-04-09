@@ -1,27 +1,16 @@
-# Take home project
-This is a simple e-commerce application that a customer can use to purchase a book, but it's missing the payments functionality — your goal is to integrate Stripe to get this application running!
+# Stripe Press Shop - Adding Payments Functionality via Stripe
 
-## Candidate instructions
-You'll receive these in email.
+This solution works by using the Stripe "Charges" API along with Stripe Elements to fulfill a customer's order. It first gets a customer's payment information by using Elements, where Elements is an easily-customizable set of UI components focused on checkout. In our case, we use the Card Element to collect credit card information. Then, we tokenize the information using Stripe.js, and submit form data that includes the token, as well as the amount to charge. Finally, the token creates a charge via the Charge API, and if the card's information is valid, the payment is accepted. We are then able to retrieve the charge ID from the Charge object response.
 
-## Application overview
-This demo is written in Python with the [Flask framework](https://flask.palletsprojects.com/). You'll need to retrieve a set of testmode API keys from the Stripe dashboard (you can create a free test account [here](https://dashboard.stripe.com/register)) to run this locally.
+When working through this problem, I first made sure I thoroughly understood the problem and requirements. The major requirements were to use Stripe Elements to purchase the item selected, and to display a confirmation with the total amount charged and Stripe charge ID. I read up on very helpful documentation regarding Stripe Elements (https://stripe.com/docs/stripe-js) and explored some sample code on the Stripe Github page (https://github.com/stripe/elements-examples/blob/master/js/example3.js). I then looked up which APIs could be used to purchase an item and found that I had three options: Stripe Checkout, PaymentIntents, and Charge. I chose the Charge API as it is the only a Charge object has a charge ID, and read up on sample use cases of the Charge API (https://stripe.com/docs/payments/charges-api)
 
-We're using the [Bootstrap](https://getbootstrap.com/docs/4.6/getting-started/introduction/) CSS framework. It's the most popular CSS framework in the world and is pretty easy to get started with — feel free to modify styles/layout if you like. 
+One challenge I had was making sense of all of the documentation I had just read, but reading through sample use cases of Stripe Elements as well as the Charge API made it a lot easier. The other challenges I faced were mainly small technical bugs regarding things I'd forgotten about HTML and Python. For example, I had forgotten that although the form has
 
-To simplify this project, we're also not using any database here, either. Instead `app.py` includes a simple case statement to read the GET params for `item`. 
+hiddenInput.setAttribute('name', 'stripeToken');
+hiddenInput.setAttribute('value', token.id);
 
-To get started, clone the repository and run pip3 to install dependencies:
+accessing this token is done through request.form['stripeToken'], not request.form['value']. There were many of these bugs that I worked through, but turning on debug mode and print statements helps a ton!
 
-```
-git clone https://github.com/marko-stripe/sa-takehome-project-python && cd sa-takehome-project-python
-pip3 install -r requirements.txt
-```
+This is just the bare-bones functionality of a checkout process using Stripe's Charge API and Stripe Elements. If I were to extend this functionality, I would add a couple features as a next step: error handling, refunds and cancellations, and adding more personal information via Stripe Elements.
 
-Then run the application locally:
-
-```
-flask run
-```
-
-Navigate to [http://localhost:5000](http://localhost:5000) to view the index page.
+There can definitely be more features added to this checkout process, but I chose those 3 as they are the most essential. Currently, when a bad card number is the input (such as 4000 0000 0000 9995), there is no page for errors, which leads to a bad customer experience, and lower usage of the site. We also need to account for when a customer wants to immediately cancel an order before it has shipped out, or request a refund. Lastly. this site would need to request for more than just a card number, date, and CVC - such as name, email, address, and phone number. This is necessary information that the book selling site would need to have in order to ship out the books, as well as email or text any confirmations regarding the order.
